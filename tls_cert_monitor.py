@@ -27,6 +27,7 @@ def configure(configobj):
         </Module>
     </Plugin>
     '''
+    # pylint: disable=C0103,W0603
     global _hosts
 
     collectd.info(
@@ -69,8 +70,8 @@ def ssl_valid_time_remaining(hostname):
     return expires - datetime.datetime.utcnow()
 
 
-# TODO remove data?
-def read(data=None):
+# Data is required
+def read():
     """Export number of days left to collectd."""
     for host in _hosts:
         remaining = ssl_valid_time_remaining(host)
@@ -88,7 +89,6 @@ def read(data=None):
 
 
 # Use a global variable here because we love python
-# pylint: disable=C0103,W0603
 _hosts = None
 
 collectd.info('tls-cert-monitor: Loading Python plugin: ' + PLUGIN_NAME)
