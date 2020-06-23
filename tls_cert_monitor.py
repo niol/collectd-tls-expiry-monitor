@@ -11,22 +11,7 @@ INTERVAL = 10  # seconds
 
 
 def configure(configobj):
-    '''Configure this plugin based on collectd.conf parts.
-
-    Example configuration:
-
-    LoadPlugin python
-    ...
-    <Plugin python>
-        ModulePath "/usr/local/lib/collectd/python/"
-        LogTraces true
-        Interactive false
-        Import "tls_cert_monitor"
-        <Module tls_cert_monitor>
-            hosts "github.com" "google.com"
-        </Module>
-    </Plugin>
-    '''
+    '''Configure this plugin based on collectd.conf parts.'''
     # pylint: disable=C0103,W0603
     global _hosts
 
@@ -89,6 +74,7 @@ def read():
 
 
 # Use a global variable here because we love python
+# pylint: disable=C0103
 _hosts = None
 
 collectd.info('tls-cert-monitor: Loading Python plugin: ' + PLUGIN_NAME)
