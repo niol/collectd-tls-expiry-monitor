@@ -72,7 +72,7 @@ def read():
 
         remaining = int(ssl_valid_time_remaining(hostname, int(port)).total_seconds())
 
-        collectd.info(
+        collectd.debug(
             "tls-cert-monitor(host=%s): Reading data (data=%d)" % (host, remaining)
         )
 
