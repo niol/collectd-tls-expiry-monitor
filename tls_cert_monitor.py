@@ -1,4 +1,5 @@
 """Retrieves the expiry of certificates from a list of hosts"""
+
 import datetime
 import socket
 import ssl
@@ -6,25 +7,26 @@ import ssl
 import collectd
 
 
-PLUGIN_NAME = 'tls-cert-monitor'
+PLUGIN_NAME = "tls-cert-monitor"
 INTERVAL = 10  # seconds
 
 
 def configure(configobj):
-    '''Configure this plugin based on collectd.conf parts.'''
+    """Configure this plugin based on collectd.conf parts."""
     # pylint: disable=C0103,W0603
     global _hosts
 
     collectd.info(
-        'tls-cert-monitor: Configure with: key=%s, children=%r' %
-        (configobj.key, configobj.children))
+        "tls-cert-monitor: Configure with: key=%s, children=%r"
+        % (configobj.key, configobj.children)
+    )
 
     config = {c.key: c.values for c in configobj.children}
 
-    collectd.info('tls-cert-monitor: Configured with %r' % (config))
+    collectd.info("tls-cert-monitor: Configured with %r" % (config))
 
     # Set a module-global based on external configuration
-    _hosts = config.get('hosts')
+    _hosts = config.get("hosts")
 
 
 def ssl_expiry_datetime(hostname):
@@ -40,10 +42,10 @@ def ssl_expiry_datetime(hostname):
     conn.connect((hostname, 443))
 
     ssl_info = conn.getpeercert()
-    ssl_date_fmt = r'%b %d %H:%M:%S %Y %Z'
+    ssl_date_fmt = r"%b %d %H:%M:%S %Y %Z"
 
     # parse the string from the certificate into a Python datetime object
-    return datetime.datetime.strptime(ssl_info['notAfter'], ssl_date_fmt)
+    return datetime.datetime.strptime(ssl_info["notAfter"], ssl_date_fmt)
 
 
 def ssl_valid_time_remaining(hostname):
@@ -64,12 +66,12 @@ def read():
         remaining = int(remaining)
 
         collectd.info(
-            'tls-cert-monitor(host=%s): Reading data (data=%d)' %
-            (host, remaining))
+            "tls-cert-monitor(host=%s): Reading data (data=%d)" % (host, remaining)
+        )
 
-        val = collectd.Values(type='gauge', type_instance=host)
+        val = collectd.Values(type="gauge", type_instance=host)
 
-        val.plugin = 'tls-cert-monitor'
+        val.plugin = "tls-cert-monitor"
         val.dispatch(values=[remaining])
 
 
@@ -77,6 +79,6 @@ def read():
 # pylint: disable=C0103
 _hosts = None
 
-collectd.info('tls-cert-monitor: Loading Python plugin: ' + PLUGIN_NAME)
+collectd.info("tls-cert-monitor: Loading Python plugin: " + PLUGIN_NAME)
 collectd.register_config(configure)
 collectd.register_read(read, INTERVAL)
