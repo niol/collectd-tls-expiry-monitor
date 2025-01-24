@@ -29,7 +29,7 @@ def configure(configobj):
     _hosts = config.get("hosts")
 
 
-def ssl_expiry_datetime(hostname):
+def ssl_expiry_datetime(hostname, port):
     """Get expiry date of cert's."""
     context = ssl.create_default_context()
     conn = context.wrap_socket(
@@ -39,7 +39,7 @@ def ssl_expiry_datetime(hostname):
 
     # 3 second timeout
     conn.settimeout(3.0)
-    conn.connect((hostname, 443))
+    conn.connect((hostname, port))
 
     ssl_info = conn.getpeercert()
     ssl_date_fmt = r"%b %d %H:%M:%S %Y %Z"
@@ -48,10 +48,10 @@ def ssl_expiry_datetime(hostname):
     return datetime.datetime.strptime(ssl_info["notAfter"], ssl_date_fmt)
 
 
-def ssl_valid_time_remaining(hostname):
+def ssl_valid_time_remaining(hostname, port):
     """Get the number of days left in a cert's lifetime."""
     try:
-        expires = ssl_expiry_datetime(hostname)
+        expires = ssl_expiry_datetime(hostname, port)
     except ssl.SSLError:
         return datetime.timedelta(0)
     return expires - datetime.datetime.utcnow()
@@ -61,9 +61,16 @@ def ssl_valid_time_remaining(hostname):
 def read():
     """Export number of days left to collectd."""
     for host in _hosts:
-        remaining = ssl_valid_time_remaining(host)
-        remaining = remaining.total_seconds()
-        remaining = int(remaining)
+        try:
+            hostname, port = host.split(":")
+        except ValueError:
+            collectd.error(
+                "tls-cert-monitor: Bad format for host %s, expecting hostname:port"
+                % host
+            )
+            continue
+
+        remaining = int(ssl_valid_time_remaining(hostname, int(port)).total_seconds())
 
         collectd.info(
             "tls-cert-monitor(host=%s): Reading data (data=%d)" % (host, remaining)
