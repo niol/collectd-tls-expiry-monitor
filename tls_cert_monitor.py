@@ -8,7 +8,7 @@ import collectd
 
 
 PLUGIN_NAME = "tls-cert-monitor"
-INTERVAL = 10  # seconds
+INTERVAL = 86400 / 2  # seconds
 
 
 def configure(configobj):
